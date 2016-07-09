@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 var argv = require('minimist')(process.argv.slice(2))
+var request = require('request')
 
 if (argv.help) {
   console.log(`
@@ -44,35 +45,35 @@ if (!process.env.MAILJET_SECRET_KEY) {
   console.error('need to define MAILJET_SECRET_KEY')
 }
 
-var Mailjet = require('node-mailjet').connect(process.env.MAILJET_KEY, process.env.MAILJET_SECRET_KEY)
-
-var sendEmail = Mailjet.post('send')
-
-var emailData = {
-  'FromEmail': argv.from_email || 'mailjet@bot.com',
-  'FromName': argv.from_name || 'mailjet bot',
-  'Subject': argv.subject || 'default subject',
-  'Text-part': argv.content || 'default content',
-  'Recipients': argv.recipients.split(';').map(function (r) {
-    return {'Email': r}
-  })
+var requestData = {
+  'method': 'POST',
+  'url': 'https://api.mailjet.com/v3/send',
+  // 'url' : 'https://' + process.env.MAILJET_KEY + ':' + process.env.MAILJET_SECRET_KEY + '@api.mailjet.com/v3/send',
+  'auth': {
+    'user': process.env.MAILJET_KEY,
+    'pass': process.env.MAILJET_SECRET_KEY
+  },
+  'headers': {
+    'Content-Type': 'application/json'
+  },
+  json: {
+    'FromEmail': argv.from_email || 'mailjet@bot.com',
+    'FromName': argv.from_name || 'mailjet bot',
+    'Subject': argv.subject || 'default subject',
+    'Text-part': argv.content || 'default content',
+    'Html-part': argv.content || 'default content',
+    'Recipients': argv.recipients.split(';').map(function (r) {
+      return {'Email': r}
+    })
+  }
 }
 
-if (argv.verbose) {
-  console.info(emailData)
-}
+console.log(requestData)
 
-sendEmail
-  .request(emailData)
-  .then(function () {
-    if (argv.verbose) {
-      console.log('success', arguments)
-    }
-    process.exit(0)
-  })
-  .catch(function () {
-    if (!argv.silent) {
-      console.log('error', arguments)
-    }
-    process.exit(1)
-  })
+request(requestData, function (err, response, body) {
+  if (err) {
+    console.log(err)
+  } else {
+    console.log('response', response.statusCode, response.body)
+  }
+})

@@ -1,11 +1,11 @@
 {
   "name": "mailjet-send-cli",
-  "version": "0.0.0",
-  "scripts" : {
-    "test" : "standard"
+  "version": "0.0.1",
+  "scripts": {
+    "test": "standard"
   },
-  "bin" :{
-    "mailjet-send" : "index.js"
+  "bin": {
+    "mailjet-send": "index.js"
   },
   "devDependencies": {
     "nodemon": "^1.9.2",
